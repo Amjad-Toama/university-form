@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>يوم التوجيه الجامعي – الجامعة المفتوحة حيفا</title>
+  <style>
+    :root {
+      --navy:   #0a1e3c;
+      --blue:   #1a4b8c;
+      --gold:   #c8973a;
+      --gold-l: #e6b85a;
+      --cream:  #fdf8f0;
+      --white:  #ffffff;
+      --gray:   #6b7280;
+      --border: #d1c4a8;
+      --error:  #c0392b;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, 'Arabic Transparent', Arial, sans-serif;
+      background: var(--cream);
+      color: var(--navy);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 10% 10%, rgba(26,75,140,.07) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 80% at 90% 90%, rgba(200,151,58,.07) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--navy);
+      color: var(--white);
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--gold) 0%, var(--gold-l) 50%, var(--gold) 100%);
+    }
+
+    .header-inner {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 28px 24px 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .logo-wrap {
+      flex-shrink: 0;
+      width: 80px; height: 80px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: rgba(255,255,255,.08);
+      border: 2px solid rgba(200,151,58,.4);
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .logo-wrap img { width: 100%; height: 100%; object-fit: contain; padding: 8px; }
+
+    .logo-placeholder {
+      font-size: 10px; color: rgba(255,255,255,.3);
+      text-align: center; padding: 8px; line-height: 1.5;
+    }
+
+    .header-text h1 { font-size: clamp(16px, 3vw, 22px); font-weight: 700; line-height: 1.3; }
+    .header-text .subtitle { margin-top: 4px; font-size: 13px; color: var(--gold-l); }
+
+    /* small admin trigger — unobtrusive, top-left corner */
+    .admin-trigger {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 200;
+      background: rgba(10,30,60,.6);
+      color: rgba(255,255,255,.35);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 11px;
+      font-family: inherit;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+      transition: color .2s, background .2s;
+    }
+
+    .admin-trigger:hover { color: var(--gold-l); background: rgba(10,30,60,.85); }
+
+    /* ── Admin overlay ── */
+    .admin-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(5,15,35,.75);
+      z-index: 300;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+      animation: fadeIn .2s ease;
+    }
+
+    .admin-overlay.open { display: flex; }
+
+    .admin-panel {
+      background: var(--white);
+      border-radius: 20px;
+      padding: 36px 32px;
+      width: min(460px, 92vw);
+      box-shadow: 0 24px 64px rgba(0,0,0,.35);
+      border: 1px solid var(--border);
+      position: relative;
+    }
+
+    .admin-panel h3 {
+      font-size: 18px; font-weight: 700; color: var(--navy);
+      margin-bottom: 20px; text-align: center;
+    }
+
+    .admin-close {
+      position: absolute; top: 16px; left: 16px;
+      background: none; border: none;
+      font-size: 20px; color: var(--gray);
+      cursor: pointer; line-height: 1;
+    }
+
+    /* password gate */
+    .pw-gate { text-align: center; }
+    .pw-gate input {
+      width: 100%; padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 16px; font-family: inherit;
+      margin-bottom: 12px;
+      text-align: center; letter-spacing: .15em;
+      direction: ltr;
+      outline: none;
+    }
+
+    .pw-gate input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(26,75,140,.10); }
+    .pw-gate input.error { border-color: var(--error); }
+    .pw-error { color: var(--error); font-size: 12px; margin-bottom: 10px; display: none; }
+
+    /* admin actions */
+    .admin-actions { display: none; flex-direction: column; gap: 10px; }
+    .admin-actions.visible { display: flex; }
+
+    .admin-counter {
+      text-align: center;
+      background: var(--gold);
+      color: var(--navy);
+      font-weight: 800;
+      font-size: 15px;
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 6px;
+    }
+
+    .act-btn {
+      width: 100%;
+      padding: 13px 20px;
+      border-radius: 10px;
+      border: none;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity .15s;
+      text-align: right;
+    }
+
+    .act-btn:hover { opacity: .85; }
+    .act-btn.blue  { background: var(--navy); color: var(--gold-l); }
+    .act-btn.green { background: #1a4b2e; color: #86efac; }
+    .act-btn.red   { background: #3b1010; color: #fca5a5; }
+
+    /* ── Main ── */
+    main {
+      position: relative; z-index: 1;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 36px 16px 60px;
+    }
+
+    .card {
+      background: var(--white);
+      border-radius: 20px;
+      padding: 40px 36px;
+      box-shadow: 0 2px 8px rgba(10,30,60,.06), 0 20px 60px rgba(10,30,60,.10);
+      border: 1px solid var(--border);
+    }
+
+    .card-intro { margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid #eee; text-align: center; }
+    .card-intro h2 { font-size: 20px; font-weight: 700; color: var(--blue); }
+
+    /* ── Grid ── */
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 28px; }
+    .field { display: flex; flex-direction: column; gap: 7px; }
+    .field.full { grid-column: 1 / -1; }
+
+    label { font-size: 13.5px; font-weight: 700; color: var(--navy); display: flex; align-items: center; gap: 5px; }
+    label .req { color: var(--gold); font-size: 15px; line-height: 1; }
+
+    input[type="text"], input[type="tel"], input[type="email"], select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 15px;
+      color: var(--navy);
+      background: #fafaf8;
+      transition: border-color .2s, box-shadow .2s, background .2s;
+      outline: none;
+      direction: rtl;
+    }
+
+    input:focus, select:focus { border-color: var(--blue); background: var(--white); box-shadow: 0 0 0 3px rgba(26,75,140,.10); }
+    input.error, select.error { border-color: var(--error); box-shadow: 0 0 0 3px rgba(192,57,43,.08); }
+
+    .err-msg { font-size: 11.5px; color: var(--error); display: none; }
+    .field.has-error .err-msg { display: block; }
+
+    .section-divider {
+      grid-column: 1 / -1;
+      display: flex; align-items: center; gap: 10px; margin: 2px 0;
+    }
+
+    .section-divider span { font-size: 12.5px; font-weight: 700; color: var(--blue); white-space: nowrap; }
+    .section-divider::before, .section-divider::after { content: ''; flex: 1; height: 1px; background: #e5e0d5; }
+
+    /* ── Submit ── */
+    .submit-wrap { margin-top: 32px; text-align: center; }
+
+    #submitBtn {
+      background: linear-gradient(135deg, var(--blue) 0%, var(--navy) 100%);
+      color: var(--white); border: none;
+      padding: 15px 52px; border-radius: 12px;
+      font-family: inherit; font-size: 16px; font-weight: 700;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .15s;
+      box-shadow: 0 4px 20px rgba(26,75,140,.30);
+    }
+
+    #submitBtn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(26,75,140,.35); }
+    #submitBtn:active { transform: translateY(0); }
+
+    /* ── Success ── */
+    .success-flash { display: none; text-align: center; padding: 40px 20px; animation: fadeIn .4s ease; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+    .success-flash .check {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: linear-gradient(135deg, #1a6b3c, #27ae60);
+      margin: 0 auto 20px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 6px 20px rgba(26,107,60,.25);
+    }
+
+    .success-flash .check svg { width: 36px; height: 36px; stroke: white; stroke-width: 2.5; fill: none; }
+    .success-flash h3 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+    .success-flash p  { color: var(--gray); font-size: 14px; }
+
+    .new-btn {
+      margin-top: 22px; display: inline-block;
+      padding: 11px 36px; background: var(--blue); color: white;
+      border: none; border-radius: 10px;
+      font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer;
+    }
+
+    /* ── Records panel (inside admin overlay) ── */
+    .records-panel {
+      display: none;
+      margin-top: 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .records-panel.visible { display: block; }
+
+    .rec-header {
+      background: var(--navy); color: white;
+      padding: 10px 16px; font-size: 13px; font-weight: 700;
+    }
+
+    .records-table-wrap { overflow-x: auto; max-height: 260px; overflow-y: auto; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 12px; direction: rtl; }
+    th { background: #f4f0e8; color: var(--navy); padding: 8px 12px; font-weight: 700; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; position: sticky; top: 0; }
+    td { padding: 8px 12px; border-bottom: 1px solid #f0ece4; color: #374151; white-space: nowrap; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fdf8f0; }
+    .no-data { text-align: center; padding: 24px; color: var(--gray); font-size: 13px; }
+
+    /* ── Footer ── */
+    .footer-note { margin-top: 28px; text-align: center; font-size: 12px; color: var(--gray); }
+    .gold-dot { display: inline-block; width: 4px; height: 4px; background: var(--gold); border-radius: 50%; vertical-align: middle; margin: 0 6px; }
+
+    @media (max-width: 560px) {
+      .card { padding: 24px 16px; }
+      .grid { grid-template-columns: 1fr; }
+      .field.full { grid-column: 1; }
+      .header-inner { flex-direction: column; text-align: center; gap: 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Unobtrusive admin trigger ── -->
+<button class="admin-trigger" onclick="openAdmin()">⚙</button>
+
+<!-- ── Admin overlay ── -->
+<div class="admin-overlay" id="adminOverlay" onclick="overlayClick(event)">
+  <div class="admin-panel" id="adminPanel">
+    <button class="admin-close" onclick="closeAdmin()">✕</button>
+    <h3>لوحة التحكم</h3>
+
+    <!-- Password gate -->
+    <div class="pw-gate" id="pwGate">
+      <p style="color:#6b7280;font-size:13px;margin-bottom:14px;">أدخل كلمة المرور للمتابعة</p>
+      <input type="password" id="pwInput" placeholder="••••••••"
+             onkeydown="if(event.key==='Enter') checkPw()" />
+      <div class="pw-error" id="pwError">كلمة المرور غير صحيحة</div>
+      <button class="act-btn blue" style="width:100%;text-align:center;" onclick="checkPw()">دخول</button>
+    </div>
+
+    <!-- Admin actions (shown after correct password) -->
+    <div class="admin-actions" id="adminActions">
+      <div class="admin-counter" id="adminCounter">0 مشترك</div>
+      <button class="act-btn blue" onclick="toggleRecords()">📋 عرض السجلات</button>
+      <button class="act-btn green" onclick="exportCSV()">⬇ تصدير CSV</button>
+      <button class="act-btn red" onclick="clearAll()">🗑 مسح جميع السجلات</button>
+
+      <!-- Records table (inside panel) -->
+      <div class="records-panel" id="recordsPanel">
+        <div class="rec-header" id="recordsTitle">السجلات</div>
+        <div class="records-table-wrap">
+          <div id="recordsBody"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Header ── -->
+<header>
+  <div class="header-inner">
+    <div class="logo-wrap">
+      <!--
+        Place your logo file named exactly "logo.png" in the same folder as this HTML file.
+        ضع ملف الشعار باسم logo.png في نفس مجلد ملف HTML.
+      -->
+      <img src="logo.png" alt="شعار الجامعة"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='block';" />
+      <div class="logo-placeholder" style="display:none;">logo.png</div>
+    </div>
+    <div class="header-text">
+      <h1>الجامعة المفتوحة · حرم حيفا</h1>
+      <div class="subtitle">האוניברסיטה הפתוחה – קמפוס חיפה</div>
+    </div>
+  </div>
+</header>
+
+<!-- ── Main ── -->
+<main>
+  <div class="card">
+
+    <div class="card-intro">
+      <h2>يوم التوجيه الجامعي</h2>
+    </div>
+
+    <!-- Form -->
+    <div id="formWrap">
+      <div class="grid">
+
+        <div class="section-divider"><span>المعلومات الشخصية</span></div>
+
+        <div class="field" id="f-firstName">
+          <label for="firstName">الاسم الشخصي <span class="req">*</span></label>
+          <input type="text" id="firstName" autocomplete="off" />
+          <span class="err-msg">الرجاء إدخال الاسم الشخصي</span>
+        </div>
+
+        <div class="field" id="f-lastName">
+          <label for="lastName">اسم العائلة <span class="req">*</span></label>
+          <input type="text" id="lastName" autocomplete="off" />
+          <span class="err-msg">الرجاء إدخال اسم العائلة</span>
+        </div>
+
+        <div class="field" id="f-idNumber">
+          <label for="idNumber">رقم الهوية <span class="req">*</span></label>
+          <input type="text" id="idNumber" maxlength="9" inputmode="numeric" autocomplete="off" />
+          <span class="err-msg">رقم الهوية يجب أن يتكون من 9 أرقام</span>
+        </div>
+
+        <div class="field" id="f-phone">
+          <label for="phone">رقم الهاتف <span class="req">*</span></label>
+          <input type="tel" id="phone" inputmode="numeric" autocomplete="off" />
+          <span class="err-msg">الرجاء إدخال رقم هاتف صحيح</span>
+        </div>
+
+        <div class="section-divider"><span>التواصل والتخصص</span></div>
+
+        <div class="field full" id="f-email">
+          <label for="email">البريد الإلكتروني <span class="req">*</span></label>
+          <input type="email" id="email" autocomplete="off" />
+          <span class="err-msg">الرجاء إدخال بريد إلكتروني صحيح</span>
+        </div>
+
+        <div class="field full" id="f-major">
+          <label for="major">التخصص الدراسي <span class="req">*</span></label>
+          <select id="major">
+            <option value="">— اختر تخصصك —</option>
+            <option>علوم الحاسوب</option>
+            <option>إدارة الأعمال</option>
+            <option>العلوم الإنسانية</option>
+            <option>العلوم الاجتماعية</option>
+            <option>التعليم</option>
+            <option>الرياضيات</option>
+            <option>أخرى</option>
+          </select>
+          <span class="err-msg">الرجاء اختيار التخصص</span>
+        </div>
+
+      </div><!-- .grid -->
+
+      <div class="submit-wrap">
+        <button id="submitBtn" onclick="handleSubmit()">تسجيل</button>
+      </div>
+    </div><!-- #formWrap -->
+
+    <!-- Success -->
+    <div class="success-flash" id="successFlash">
+      <div class="check">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h3>تم التسجيل بنجاح</h3>
+      <p style="color:#6b7280;font-size:14px;">شكراً لك</p>
+      <button class="new-btn" onclick="resetForm()">تسجيل طالب جديد</button>
+    </div>
+
+  </div><!-- .card -->
+
+  <div class="footer-note">
+    الجامعة المفتوحة <span class="gold-dot"></span> קמפוס חיפה
+  </div>
+</main>
+
+<script>
+  const STORAGE_KEY = 'openU_haifa_2025';
+  const ADMIN_PW    = '1234';   // ← change this password
+
+  const HEB_HEADERS = ['שם פרטי','שם משפחה','מספר תעודת זהות','מספר טלפון','דואר אלקטרוני','התמחות','תאריך ושעה'];
+
+  const RULES = [
+    { id: 'firstName', wrap: 'f-firstName', test: v => v.trim().length >= 2 },
+    { id: 'lastName',  wrap: 'f-lastName',  test: v => v.trim().length >= 2 },
+    { id: 'idNumber',  wrap: 'f-idNumber',  test: v => /^\d{9}$/.test(v.trim()) },
+    { id: 'phone',     wrap: 'f-phone',     test: v => /^0[0-9]{9}$/.test(v.trim().replace(/[-\s]/g,'')) },
+    { id: 'email',     wrap: 'f-email',     test: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) },
+    { id: 'major',     wrap: 'f-major',     test: v => v !== '' },
+  ];
+
+  // ── Storage ──────────────────────────────────────────────────
+  function loadRecords() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+    catch { return []; }
+  }
+
+  function saveRecords(r) { localStorage.setItem(STORAGE_KEY, JSON.stringify(r)); }
+
+  // ── Validation ───────────────────────────────────────────────
+  function validate() {
+    let ok = true;
+    RULES.forEach(r => {
+      const el = document.getElementById(r.id);
+      const wrap = document.getElementById(r.wrap);
+      const pass = r.test(el.value);
+      el.classList.toggle('error', !pass);
+      wrap.classList.toggle('has-error', !pass);
+      if (!pass) ok = false;
+    });
+    return ok;
+  }
+
+  // ── Submit ───────────────────────────────────────────────────
+  function handleSubmit() {
+    if (!validate()) return;
+    const now = new Date();
+    const timestamp =
+      now.toLocaleDateString('he-IL') + ' ' +
+      now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+
+    const entry = {
+      firstName: document.getElementById('firstName').value.trim(),
+      lastName:  document.getElementById('lastName').value.trim(),
+      idNumber:  document.getElementById('idNumber').value.trim(),
+      phone:     document.getElementById('phone').value.trim().replace(/[-\s]/g,''),
+      email:     document.getElementById('email').value.trim(),
+      major:     document.getElementById('major').value,
+      timestamp
+    };
+
+    const records = loadRecords();
+    records.push(entry);
+    saveRecords(records);
+
+    document.getElementById('formWrap').style.display = 'none';
+    document.getElementById('successFlash').style.display = 'block';
+  }
+
+  // ── Reset ────────────────────────────────────────────────────
+  function resetForm() {
+    RULES.forEach(r => {
+      const el = document.getElementById(r.id);
+      el.tagName === 'SELECT' ? (el.selectedIndex = 0) : (el.value = '');
+      el.classList.remove('error');
+      document.getElementById(r.wrap).classList.remove('has-error');
+    });
+    document.getElementById('successFlash').style.display = 'none';
+    document.getElementById('formWrap').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ── Admin overlay ────────────────────────────────────────────
+  function openAdmin() {
+    document.getElementById('adminOverlay').classList.add('open');
+    document.getElementById('pwInput').focus();
+  }
+
+  function closeAdmin() {
+    document.getElementById('adminOverlay').classList.remove('open');
+    // reset password gate
+    document.getElementById('pwInput').value = '';
+    document.getElementById('pwError').style.display = 'none';
+    document.getElementById('pwInput').classList.remove('error');
+    document.getElementById('pwGate').style.display = 'block';
+    document.getElementById('adminActions').classList.remove('visible');
+    document.getElementById('recordsPanel').classList.remove('visible');
+  }
+
+  function overlayClick(e) {
+    if (e.target === document.getElementById('adminOverlay')) closeAdmin();
+  }
+
+  function checkPw() {
+    const val = document.getElementById('pwInput').value;
+    if (val === ADMIN_PW) {
+      document.getElementById('pwGate').style.display = 'none';
+      document.getElementById('adminActions').classList.add('visible');
+      document.getElementById('adminCounter').textContent = loadRecords().length + ' مشترك';
+    } else {
+      document.getElementById('pwError').style.display = 'block';
+      document.getElementById('pwInput').classList.add('error');
+    }
+  }
+
+  // ── Records ──────────────────────────────────────────────────
+  function toggleRecords() {
+    const panel = document.getElementById('recordsPanel');
+    const visible = panel.classList.contains('visible');
+    if (!visible) renderRecords();
+    panel.classList.toggle('visible', !visible);
+  }
+
+  function esc(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function renderRecords() {
+    const records = loadRecords();
+    document.getElementById('recordsTitle').textContent = 'السجلات (' + records.length + ')';
+    const body = document.getElementById('recordsBody');
+
+    if (records.length === 0) {
+      body.innerHTML = '<div class="no-data">لا توجد سجلات بعد</div>';
+      return;
+    }
+
+    const rows = records.map((r, i) => `
+      <tr>
+        <td>${i+1}</td>
+        <td>${esc(r.firstName)}</td>
+        <td>${esc(r.lastName)}</td>
+        <td>${esc(r.idNumber)}</td>
+        <td>${esc(r.phone)}</td>
+        <td>${esc(r.email)}</td>
+        <td>${esc(r.major)}</td>
+        <td>${esc(r.timestamp)}</td>
+      </tr>`).join('');
+
+    body.innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>${esc(HEB_HEADERS[0])}</th><th>${esc(HEB_HEADERS[1])}</th>
+            <th>${esc(HEB_HEADERS[2])}</th><th>${esc(HEB_HEADERS[3])}</th>
+            <th>${esc(HEB_HEADERS[4])}</th><th>${esc(HEB_HEADERS[5])}</th>
+            <th>${esc(HEB_HEADERS[6])}</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+
+  // ── Export CSV ───────────────────────────────────────────────
+  function exportCSV() {
+    const records = loadRecords();
+    if (records.length === 0) { alert('לא קיימים נתונים לייצוא.'); return; }
+
+    const wrapCSV = v => {
+      const s = String(v || '');
+      return (s.includes(',') || s.includes('"') || s.includes('\n'))
+        ? '"' + s.replace(/"/g, '""') + '"' : s;
+    };
+
+    const lines = [
+      HEB_HEADERS.map(wrapCSV).join(','),
+      ...records.map(r => [
+        r.firstName, r.lastName, r.idNumber,
+        r.phone, r.email, r.major, r.timestamp
+      ].map(wrapCSV).join(','))
+    ];
+
+    const csvText = lines.join('\r\n');
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+    if (isIOS) {
+      const date = new Date().toISOString().slice(0,10);
+      const html = `<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>بيانات التسجيل – ${date}</title>
+  <style>
+    body { font-family: -apple-system, Arial, sans-serif; background: #f4f0e8; margin: 0; padding: 20px; direction: rtl; }
+    h2 { color: #0a1e3c; font-size: 18px; margin-bottom: 8px; }
+    p  { color: #6b7280; font-size: 13px; margin-bottom: 16px; line-height: 1.6; }
+    .btn { display: inline-block; background: #1a4b8c; color: white; border: none; padding: 12px 28px; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; margin-bottom: 20px; }
+    pre { background: white; border: 1px solid #d1c4a8; border-radius: 10px; padding: 16px; font-size: 12px; white-space: pre-wrap; word-break: break-all; direction: ltr; text-align: left; line-height: 1.6; color: #374151; }
+    .copied { color: #1a6b3c; font-weight: 700; font-size: 13px; margin-right: 12px; display: none; }
+  </style>
+</head>
+<body>
+  <h2>بيانات يوم التوجيه الجامعي</h2>
+  <p>اضغط <strong>نسخ البيانات</strong> ثم الصق النص في Notes أو البريد الإلكتروني.</p>
+  <button class="btn" onclick="copyData()">نسخ البيانات</button>
+  <span class="copied" id="copiedMsg">✓ تم النسخ!</span>
+  <pre id="csvPre">${csvText.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>
+  <script>
+    function copyData() {
+      navigator.clipboard.writeText(document.getElementById('csvPre').innerText)
+        .then(() => { const m=document.getElementById('copiedMsg'); m.style.display='inline'; setTimeout(()=>m.style.display='none',2500); })
+        .catch(() => { const r=document.createRange(); r.selectNodeContents(document.getElementById('csvPre')); window.getSelection().removeAllRanges(); window.getSelection().addRange(r); alert('حدد النص أعلاه ثم انسخه يدوياً.'); });
+    }
+  <\/script>
+</body>
+</html>`;
+      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+      window.open(URL.createObjectURL(blob), '_blank');
+      return;
+    }
+
+    // Desktop
+    const blob = new Blob(['\uFEFF' + csvText], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'registrations_' + new Date().toISOString().slice(0,10) + '.csv';
+    a.click();
+  }
+
+  // ── Clear all ────────────────────────────────────────────────
+  function clearAll() {
+    const n = loadRecords().length;
+    if (n === 0) { alert('لا توجد بيانات.'); return; }
+    if (!confirm('مسح جميع السجلات (' + n + ')؟\nلا يمكن التراجع عن هذه العملية.')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    document.getElementById('adminCounter').textContent = '0 مشترك';
+    document.getElementById('recordsPanel').classList.remove('visible');
+    alert('تم المسح.');
+  }
+
+  // ── Live clear errors ────────────────────────────────────────
+  RULES.forEach(r => {
+    document.getElementById(r.id).addEventListener('input', function () {
+      this.classList.remove('error');
+      document.getElementById(r.wrap).classList.remove('has-error');
+    });
+  });
+</script>
+</body>
+</html>
