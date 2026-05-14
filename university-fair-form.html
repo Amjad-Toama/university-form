@@ -279,13 +279,13 @@
 
         <div class="field" id="f-idNumber">
           <label for="idNumber">رقم الهوية <span class="req">*</span></label>
-          <input type="text" id="idNumber" maxlength="9" inputmode="numeric" autocomplete="off" />
+          <input type="text" id="idNumber" maxlength="9" inputmode="numeric" pattern="[0-9]*" autocomplete="off" />
           <span class="err-msg">رقم الهوية يجب أن يتكون من 9 أرقام</span>
         </div>
 
         <div class="field" id="f-phone">
           <label for="phone">رقم الهاتف <span class="req">*</span></label>
-          <input type="tel" id="phone" inputmode="numeric" autocomplete="off" />
+          <input type="tel" id="phone" inputmode="numeric" pattern="[0-9]*" autocomplete="off" />
           <span class="err-msg">الرجاء إدخال رقم هاتف صحيح</span>
         </div>
 
